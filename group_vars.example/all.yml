@@ -1,0 +1,7 @@
+letsencrypt_dir: "/path/to/letsencryptdirectory"
+letsencrypt_keys_dir: "{{ letsencrypt_dir }}/keys"
+letsencrypt_csrs_dir: "{{ letsencrypt_dir }}/csrs"
+letsencrypt_certs_dir: "{{ letsencrypt_dir }}/certs"
+privatekey_passphrase: "passphrase for keys"
+letsencrypt_owner: "ownerofletsencryptdirectories"
+letsencrypt_group: "groupofletsencryptdirectories"

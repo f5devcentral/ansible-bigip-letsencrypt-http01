@@ -1,0 +1,23 @@
+---
+ansible_host: 0.0.0.0
+ansible_ssh_user: admin
+ansible_ssh_pass: bigippassword
+atc_provider:
+  server: "{{ ansible_host }}"
+  user: "{{ ansible_ssh_user }}"
+  password: "{{ ansible_ssh_pass }}"
+  server_port: 443
+  validate_certs: false  
+applications:
+  A1:
+    name: A1
+    acme_staging_flag: "staging-" # staging-  set the flag to 'staging-' when using the staging API and an empty string ('') for the production API
+    domain_name: "my.domain.name"
+    organization_name: "my organization"
+    country_name: "US"
+    acme_email: "admin@emailaddress"
+    letsencrypt_account_key: "myprivateaccountkey.key"
+    template: https
+    class: Service_HTTPS
+    virtualAddress: "10.0.10.1"
+    serverAddresses: "10.30.10.1,10.30.10.2"

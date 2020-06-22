@@ -1,0 +1,19 @@
+---
+- name: Post AS3
+  hosts: bigips
+  connection: local
+  gather_facts: false
+  vars: 
+  tasks:
+    - name: build declaration
+      template: 
+        src: "{{ playbook_dir }}/as3.json.j2"
+        dest: "{{ playbook_dir }}/{{ inventory_hostname }}as3out.json"
+    - name: post AS3 declaration
+      include_role:
+        name: f5devcentral.atc_deploy
+      vars:
+        provider: "{{ atc_provider }}"
+        atc_method: POST
+        atc_declaration_file: "{{ playbook_dir }}/{{ inventory_hostname }}as3out.json"
+        atc_service: AS3

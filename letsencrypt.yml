@@ -1,0 +1,88 @@
+- hosts: bigips
+  gather_facts: no
+  vars:
+  tasks:
+    - name: "Create /etc/letsencrypt directories"
+      file:
+        path: "{{ letsencrypt_dir }}/{{ item }}"
+        state: directory
+        owner: "{{ letsencrypt_owner }}"
+        group: "{{ letsencrypt_group }}"
+        mode: u=rwx,g=x,o=x
+      with_items:
+      - account
+      - certs
+      - csrs
+      - keys
+      delegate_to: localhost
+    - name: "Create private key for the account"
+      openssl_privatekey:
+        path: "{{ letsencrypt_dir }}/account/{{ item.value.acme_staging_flag }}{{ item.value.letsencrypt_account_key }}"
+        size: 4096
+        #passphrase: "{{ privatekey_passphrase }}"
+        #cipher: auto
+      delegate_to: localhost
+      with_dict: "{{ applications }}"
+    - name: "Create private key for the domain"
+      openssl_privatekey:
+        path: "{{ letsencrypt_keys_dir }}/{{ item.value.acme_staging_flag }}{{ item.value.domain_name }}.key"
+        size: 4096
+        passphrase: "{{ privatekey_passphrase }}"
+        cipher: auto
+      delegate_to: localhost
+      with_dict: "{{ applications }}"
+    - name: "Generate the Certificate Signing Request"
+      openssl_csr:
+        path: "{{ letsencrypt_csrs_dir }}/{{ item.value.acme_staging_flag }}{{ item.value.domain_name }}.csr"
+        privatekey_path: "{{ letsencrypt_keys_dir }}/{{ item.value.acme_staging_flag }}{{ item.value.domain_name }}.key"
+        privatekey_passphrase: "{{ privatekey_passphrase }}"
+        common_name: "{{ item.value.acme_staging_flag }}{{ item.value.domain_name }}"
+        country_name: "{{ item.value.country_name }}"
+        organization_name: "{{ item.value.organization_name }}"
+        email_address: "{{ item.value.acme_email }}"
+      delegate_to: localhost
+      with_dict: "{{ applications }}"
+    - name: "Create the challenge"
+      acme_certificate:
+        account_key_src: "{{ letsencrypt_dir }}/account/{{ item.value.acme_staging_flag }}{{ item.value.letsencrypt_account_key }}"
+        acme_directory: "https://acme-{{ item.value.acme_staging_flag }}v02.api.letsencrypt.org/directory" #https://acme-staging-v02.api.letsencrypt.org/directory
+        acme_version: "{{ acme_version }}"
+        terms_agreed: yes
+        validate_certs: yes # this may be set to 'no' if a known security appliance is returning invalid certs
+        force: yes
+        challenge: "{{ acme_challenge_type }}"
+        csr: "{{ letsencrypt_csrs_dir }}/{{ item.value.acme_staging_flag }}{{ item.value.domain_name }}.csr"
+        dest: "{{ letsencrypt_certs_dir }}/{{ item.value.acme_staging_flag }}{{ item.value.domain_name }}.crt"
+        fullchain_dest: "{{ letsencrypt_certs_dir }}/{{ item.value.acme_staging_flag }}{{ item.value.domain_name }}_fullchain.crt"
+      register: domain_challenge
+      delegate_to: localhost
+      with_dict: "{{ applications }}"
+    - name: "Create acme-challenge directory on the acme challenge server"
+      file:
+        path: "{{ hostvars[item]['www_root'] }}/.well-known/acme-challenge"
+        state: directory
+        mode: u=rwx,g=rx,o=rx
+      delegate_to: "{{ item }}"
+      with_items: "{{ groups['acmelisteners'] }}"
+    - name: "put a file on the acme challenge listeners"
+      copy:
+        dest: "{{ hostvars[item.0]['www_root'] }}/{{ applications[item.1].acme_staging_flag + applications[item.1].domain_name }}/html/{{ domain_challenge['results'][0]['challenge_data'][ applications[item.1].acme_staging_flag + applications[item.1].domain_name ]['http-01']['resource'] }}"
+        content: "{{ domain_challenge['results'][0]['challenge_data'][ applications[item.1].acme_staging_flag + applications[item.1].domain_name ]['http-01']['resource_value'] }}"
+      when: domain_challenge is changed
+      delegate_to: "{{ item.0 }}"
+      loop: "{{ groups['acmelisteners'] | product(applications)| list }}"
+    - name: "validate the challenge"
+      acme_certificate:
+        account_key_src: "{{ letsencrypt_dir }}/account/{{ item.value.acme_staging_flag }}{{ item.value.letsencrypt_account_key }}"
+        acme_directory: "https://acme-{{ item.value.acme_staging_flag }}v02.api.letsencrypt.org/directory"
+        acme_version: "{{ acme_version }}"
+        terms_agreed: yes
+        validate_certs: yes # this may be set to 'no' if a known security appliance is returning invalid certs
+        challenge: "{{ acme_challenge_type }}"
+        csr: "{{ letsencrypt_csrs_dir }}/{{ item.value.acme_staging_flag }}{{ item.value.domain_name }}.csr"
+        dest: "{{ letsencrypt_certs_dir }}/{{ item.value.acme_staging_flag }}{{ item.value.domain_name }}.crt"
+        fullchain_dest: "{{ letsencrypt_certs_dir }}/{{ item.value.acme_staging_flag }}{{ item.value.domain_name }}_fullchain.crt"
+        chain_dest: "{{ letsencrypt_certs_dir }}/{{ item.value.acme_staging_flag }}{{ item.value.domain_name }}_intermediate.crt"
+        data: "{{ domain_challenge['results'][0] }}"
+      delegate_to: localhost
+      with_dict: "{{ applications }}"

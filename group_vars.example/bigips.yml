@@ -1,0 +1,2 @@
+acme_challenge_type: http-01
+acme_version: 2

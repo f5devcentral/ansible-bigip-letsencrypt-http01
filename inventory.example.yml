@@ -1,0 +1,12 @@
+---
+all:
+  children:
+    bigips:
+      hosts:
+        bigip1:
+    webservers:
+      hosts:
+        webserver1:
+    acmelisteners:
+      hosts:
+        acmelistener1:

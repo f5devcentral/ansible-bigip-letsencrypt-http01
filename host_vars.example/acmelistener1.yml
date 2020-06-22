@@ -1,0 +1,8 @@
+domain_name: "{{ acme_staging_flag }}my.domain.name"
+www_root: /var/www
+nginx_root: /etc/nginx
+ansible_become: true
+ansible_become_password: "sudopassword"
+ansible_host: 0.0.0.0
+ansible_user: admin
+ansible_ssh_private_key_file: /path/to/privatekeyfile

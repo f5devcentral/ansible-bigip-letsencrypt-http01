@@ -1,0 +1,7 @@
+www_root: /var/www/{{ domain_name }}/html
+nginx_root: /etc/nginx
+ansible_become: true
+ansible_become_password: "sudopassword"
+ansible_host: hashivault
+ansible_user: webserveruser
+ansible_ssh_private_key_file: /path/to/privatekeyfile

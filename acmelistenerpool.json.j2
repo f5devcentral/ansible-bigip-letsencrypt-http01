@@ -1,0 +1,51 @@
+{
+    "class": "AS3",
+    "action": "deploy",
+    "persist": true,
+    "declaration": {
+        "class": "ADC",
+        "schemaVersion": "3.9.0",
+        "id": "12345654321",
+        "label": "acmechallengelistener",
+        "remark": "listener pool for ACME http certificate challenges",
+        "Common": {
+            "class": "Tenant",
+            "Shared": {
+                "class": "Application",
+                "template": "shared",                
+                "acmelisteners": {
+                    "class": "Pool",
+                    "members": [
+                        {
+                            "servicePort": 80,
+                            "serverAddresses": [{% for host in groups['acmelisteners'] %}"{{ hostvars[host]['ansible_host'] }}"{{ "," if not loop.last else "" }}{% endfor %}],
+                            "shareNodes": true
+                        }
+                    ]
+                },
+                "forward_policy": {
+                    "class": "Endpoint_Policy",
+                    "rules": [{
+                    "name": "forward_acme_challenge_requests",
+                    "conditions": [{
+                        "type": "httpUri",
+                        "path": {
+                        "operand": "starts-with",
+                        "values": ["/.well-known/acme-challenge"]
+                        }
+                    }],
+                    "actions": [{
+                        "type": "forward",
+                        "event": "request",
+                        "select": {
+                        "pool": {
+                            "use": "acmelisteners"
+                        }
+                        }
+                    }]
+                    }]
+                }
+            }
+        }
+    }
+}

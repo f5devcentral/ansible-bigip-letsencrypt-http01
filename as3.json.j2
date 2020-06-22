@@ -1,0 +1,40 @@
+{
+    "class": "AS3",
+    "action": "deploy",
+    "persist": true,
+    "declaration": {
+        "class": "ADC",
+        "schemaVersion": "3.0.0",
+        "id": "123abc",
+        "label": "Multiple certificates example",
+        "remark": "Using multiple certificates",
+        "Sample_cert_02": {
+            "class": "Tenant",
+            {% for app in applications %}
+            "{{ app.name }}": {
+                "class": "Application",
+                "template": "{{ app.template }}",
+                "serviceMain": {
+                    "class": "{{ app.class }}",
+                    "virtualAddresses": [
+                        "{{ app.virtualAddress }}"
+                    ],
+                    "serverTLS": "{{ app.name }}webtls"
+                },
+                "{{ app.name }}webtls": {
+                    "class": "TLS_Server",
+                    "certificates": [{
+                        "certificate": "{{ app.name }}webcert"
+                    }]
+                },
+                "{{ app.name }}webcert": {
+                    "class": "Certificate",
+                    "remark": "replace these with real certificates and keys",
+                    "certificate": {{ lookup('file', playbook_dir + '/certs/' + app.name + 'certificate.pem') | to_json }},
+                    "privateKey": {{ lookup('file', playbook_dir + '/keys/' + app.name + 'key.pem') | to_json }}
+                }
+            }{{ "," if not loop.last else "" }}
+            {% endfor %}
+        }
+    }
+}
