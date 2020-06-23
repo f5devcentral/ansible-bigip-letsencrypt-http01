@@ -16,6 +16,10 @@ This is an example of automating the request of new or updated certificates for 
 Install this repository on your automation host. Verify that it is possible to ssh to BIG-IP from your automation host. On the BIG-IP create a virtual server for each application, with pools and application servers as appropriate.
 
 ### Create an inventory file
+| | |
+|:---|:---|
+| :warning: | some text |
+
 :warning: Since the inventory and its associated group and host vars will likely contain some sensitive information, prevent inadvertent leaks to public repositories by placing your *inventory.yml* somewhere outside of the repository directory. You can copy the *inventory.example.yml* as a starting point. 
 
 For example, place the following in *inventory.yml*
