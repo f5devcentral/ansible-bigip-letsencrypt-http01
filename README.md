@@ -74,7 +74,9 @@ Update the values as appropriate for your BIG-IP. You can duplicate the *A1* blo
 
 ### Set the location for the keys and certs
 Update the acme challenge variables in *group_vars/all.yml* to reference the location where your keys and certificates will be placed. 
-:warning: This must not be within the repository directories in order to avoid inadvertently committing private keys to a public source control repository.
+| | |
+|:---|:---|
+|:warning:| This must not be within the repository directories in order to avoid inadvertently committing private keys to a public source control repository.|
 ```yaml
 acmechallenge_dir: "/path/to/acmechallengedirectory"
 acmechallenge_keys_dir: "{{ acmechallenge_dir }}/keys"
