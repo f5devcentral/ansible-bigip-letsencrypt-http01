@@ -7,7 +7,7 @@ This is an example of automating the request of new or updated certificates for 
 - [Ansible](https://www.ansible.com/) 2.9+ installed on your automation host
 - [F5 Ansible modules](https://galaxy.ansible.com/f5networks/f5_modules) installed with the above
 - a web server running [NGINX](https://www.nginx.com/)
-- F5 [BIG-IP](https://www.f5.com/products/big-ip-services) with the [Automation Toochain](https://www.f5.com/products/automation-and-orchestration) installed 
+- F5 [BIG-IP](https://www.f5.com/products/big-ip-services) with the [Automation Toolchain](https://www.f5.com/products/automation-and-orchestration) installed 
 - Domain name with A Record/CNAME
 
 
