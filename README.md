@@ -38,6 +38,8 @@ Place the necessary address and access information in the appropriate *group_var
 
 This demonstration code requires the groups *bigips* and *acmelisteners*. 
 
+## Managing Sensitive Values
+Within this demo, passwords, passphrases and similar sensitive data is managed as clear text values. In a real-world environment, it is highly recommended you use a solution for encrypting and otherwise protecting these values, such as [Ansible Vault](https://docs.ansible.com/ansible/2.8/user_guide/playbooks_vault.html).
 
 ### Setup host variables for your BIG-IPs
 For each of your BIG-IPs create a label in your *inventory.yml* as shown above for ```bigip1:```. In your *host_vars* directory, create a file for each BIG-IP named uniformly with the label in your *inventory.yml* file. For example, for the ```bigip1:``` reference in the inventory above, you would create a *bigip1.yml* file in your *host_vars* directory. In the host variables file put the following;
